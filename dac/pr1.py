@@ -2,7 +2,7 @@ try:
     import RPi.GPIO as GPIO
     import time
 except ImportError:
-    print ("Import error!")
+    print ("Ошибка импорта")
     raise SystemExit
  
 try:
@@ -10,7 +10,7 @@ try:
     GPIO.setmode (GPIO.BCM)
     GPIO.setup (chan_list, GPIO.OUT)
 except:
-    print ("GPIO Initialization error!")
+    print ("Ошибка инициализации GPIO")
     raise SystemExit
  
  
