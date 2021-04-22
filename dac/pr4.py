@@ -1,5 +1,5 @@
 try:
-    import RPi.GPIO as GPIO
+    #import RPi.GPIO as GPIO
     import time
     import numpy as np
     import matplotlib.pyplot as plt
