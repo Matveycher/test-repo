@@ -1,3 +1,4 @@
+
 try:
     import RPi.GPIO as GPIO
     import time
@@ -5,10 +6,16 @@ except ImportError:
     print ("Import error!")
     raise SystemExit
  
+outstr = "Digital value: {digital}, analog value: {analog} V"
+maxV = 3.3
 try:
-    chan_list = (26, 19, 13, 6, 5, 11, 9, 10)
+    out_list = (26, 19, 13, 6, 5, 11, 9, 10)
+    in_chan = 4
+    V_chan = 17
     GPIO.setmode (GPIO.BCM)
-    GPIO.setup (chan_list, GPIO.OUT)
+    GPIO.setup (out_list, GPIO.OUT)
+    GPIO.setup (V_chan, GPIO.OUT)
+    GPIO.setup (in_chan, GPIO.IN)
 except:
     print ("GPIO Initialization error!")
     raise SystemExit
@@ -21,34 +28,25 @@ def decToBinList (decNumber):
  
 def num2dac (value):
     x = decToBinList (value)
-    GPIO.output (chan_list, tuple (x))
+    GPIO.output (out_list, tuple (x))
  
-repetitionsNumber = 0
-while True:
-    try:
-        repetitionsNumber = int(input ("Введите количество повторений: "))
-        if repetitionsNumber >= 0:
-            break
-        else:
-            print ("Число должно быть неотрицательным. Попробуйте еще раз:")
-            continue
-    except ValueError:
-        print ("Необходимо ввести число! Попробуйте еще раз:")
-    except:
-        print ("Неизвестная ошибка, выходим из программы.")
-        GPIO.cleanup (chan_list)
-        raise SystemExit
- 
+def V_search ():
+    for dg in range (0, 256, 1):
+        an = maxV * dg / 255
+        num2dac(int(dg * 50 / 255))
+        time.sleep (0.00001)
+        if GPIO.input (in_chan) == 0:
+            print(outstr.format(digital = dg, analog = an))
+            return dg
 try:
-    for i in range(repetitionsNumber):
-        for x in range(0, 256, 1):
-            num2dac(x)
-            time.sleep (0.01)
-        for x in range(254, -1, -1):
-            num2dac(x)
-            time.sleep(0.01)
+    GPIO.output (V_chan, 1)
+    while True:
+        V_search()
 except:
-    print ("Неизвестная ошибка, выходим из программы")
+    print ("Неизвестная ошибка, выходим из программы.")
 finally:
-    GPIO.output (chan_list, 0)
-    GPIO.cleanup (chan_list)
+    GPIO.output (out_list, 0)
+    GPIO.output (V_chan, 0)
+    GPIO.cleanup (out_list)
+    GPIO.cleanup (V_chan)
+    GPIO.cleanup (in_chan)
